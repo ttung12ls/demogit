@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mysql:
+    container_name: orders-mysql
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: meomeo123
+      MYSQL_DATABASE: orders
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/custom.cnf:/etc/mysql/conf.d/custom.cnf
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --ssl=0 --default-authentication-plugin=mysql_native_password
+    networks:
+      - orders-network
+
+networks:
+  orders-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
