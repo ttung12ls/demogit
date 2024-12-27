@@ -8,18 +8,20 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDTO {
-    private Long OrderId;
-    private String Customer;
-    private LocalDate OrderDate;
-    private BigDecimal Freight;
-    private String ShipCountry;
-    private String ShippingCompany;
+    private Long orderId;
+    private String customer;
+    private LocalDate orderDate;
+    private BigDecimal freight;
+    private String shipCountry;
+    private String shippingCompany;
 
     public static Order dtoToEntity (OrderDTO orderDTO){
         Order order = new Order();

@@ -1,5 +1,6 @@
 package com.example.Order.data;
 
+import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Generated;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,16 +22,16 @@ import java.util.Date;
 public class Order {
     @Id
     @Column ("OrderID")
-    private Long OrderId;
+    private Long orderId;
     @Column ("Customer")
-    private String Customer;
+    private String customer;
     @Column ("OrderDate")
-    private LocalDate OrderDate;
+    private LocalDate orderDate;
     @Column ("Freight")
-    private BigDecimal Freight;
+    private BigDecimal freight;
     @Column ("ShipCountry")
-    private String ShipCountry;
+    private String shipCountry;
     @Column ("ShippingCompany")
-    private String ShippingCompany;
+    private String shippingCompany;
 
 }

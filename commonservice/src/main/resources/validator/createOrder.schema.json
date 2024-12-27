@@ -1,0 +1,35 @@
+{
+  "$id": "https://example.com/createOrder.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Validate create order request",
+  "description": "Create New Order",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "customer": {
+      "type": "string",
+      "description": "Customer full name",
+      "pattern": "([A-Za-z])"
+    },
+    "orderDate": {
+      "type": "string",
+      "format": "full-date"
+  },
+    "freight": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Freight cost"
+    },
+    "shipCountry": {
+      "type": "string",
+      "description": "Ship to Country",
+      "pattern": "([A-Za-z])"
+    },
+    "shippingCompany": {
+      "type": "string",
+      "description": "Shipping Company",
+      "pattern": "([A-Za-z])"
+    }
+  },
+  "required": ["customer", "orderDate", "freight", "shipCountry", "shippingCompany"]
+}
