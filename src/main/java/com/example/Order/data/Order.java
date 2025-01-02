@@ -1,10 +1,12 @@
 package com.example.Order.data;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Generated;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -26,7 +28,7 @@ public class Order {
     @Column ("Customer")
     private String customer;
     @Column ("OrderDate")
-    private LocalDate orderDate;
+    private LocalDate orderDate = LocalDate.now();
     @Column ("Freight")
     private BigDecimal freight;
     @Column ("ShipCountry")

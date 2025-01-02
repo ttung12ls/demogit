@@ -1,5 +1,6 @@
 package com.example.Order.model;
 
+import ch.qos.logback.classic.pattern.ClassOfCallerConverter;
 import com.example.Order.data.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ import java.util.Date;
 public class OrderDTO {
     private Long orderId;
     private String customer;
-    private LocalDate orderDate;
+    private LocalDate orderDate = LocalDate.now();
     private BigDecimal freight;
     private String shipCountry;
     private String shippingCompany;

@@ -11,10 +11,7 @@
       "description": "Customer full name",
       "pattern": "([A-Za-z])"
     },
-    "orderDate": {
-      "type": "string",
-      "format": "full-date"
-  },
+
     "freight": {
       "type": "number",
       "minimum": 0,
@@ -31,5 +28,5 @@
       "pattern": "([A-Za-z])"
     }
   },
-  "required": ["customer", "orderDate", "freight", "shipCountry", "shippingCompany"]
+  "required": ["customer", "freight", "shipCountry", "shippingCompany"]
 }
