@@ -3,82 +3,96 @@ package com.example.Order.service;
 import com.example.Order.data.Order;
 import com.example.Order.model.OrderDTO;
 import com.example.Order.repository.OrderRepository;
+import com.ttung.commonservice.common.CommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static com.example.Order.model.OrderDTO.dtoToEntity;
+
 @Service
 @Slf4j
 public class OrderService {
-    
     @Autowired
-    private OrderRepository orderRepository;
+    OrderRepository orderRepository;
 
     public Flux<OrderDTO> getAllOrders() {
         return orderRepository.findAll()
-                .map(this::convertToDTO);
+                .map(order -> OrderDTO.entityToDto(order))
+                .switchIfEmpty(Mono.error(new CommonException("OE03", "List empty", HttpStatus.NOT_FOUND)));
+    }
+
+    public Mono<OrderDTO> findById(Integer OrderId) {
+        return orderRepository.findById(OrderId)
+                .map(OrderDTO::entityToDto)  // Chuyển đổi từ entity sang DTO
+                .switchIfEmpty(Mono.error(new CommonException("OE01", "Not found", HttpStatus.NOT_FOUND)));
+    }
+
+    public Flux<OrderDTO> findByCustomerName(String customer) {
+        if (customer == null || customer.trim().isEmpty()) {
+            return Flux.error(new CommonException("OE04", 
+                "Customer name cannot be empty", 
+                HttpStatus.BAD_REQUEST));
+        }
+        return orderRepository.findByCustomer(customer.trim())
+                .map(OrderDTO::entityToDto)
+                .switchIfEmpty(Flux.error(new CommonException("OE01", 
+                    String.format("No orders found for customer containing: '%s'", customer), 
+                    HttpStatus.NOT_FOUND)));
     }
 
     public Mono<Boolean> checkDuplicate(String customer) {
-        return orderRepository.existsByCustomer(customer);
-    }
-
-    public Mono<OrderDTO> findById(Long orderId) {
-        return orderRepository.findById(orderId)
-                .map(this::convertToDTO);
-    }
-
-    public Mono<OrderDTO> findByCustomerName(String customer) {
         return orderRepository.findByCustomer(customer)
-                .map(this::convertToDTO);
+                .hasElements();
     }
 
     public Mono<OrderDTO> createOrder(OrderDTO orderDTO) {
-        Order order = convertToEntity(orderDTO);
-        return orderRepository.save(order)
-                .map(this::convertToDTO);
-    }
-
-    public Mono<Order> updateOrder(Long orderId, OrderDTO orderDTO) {
-        return orderRepository.findById(orderId)
-                .flatMap(existingOrder -> {
-                    existingOrder.setCustomer(orderDTO.getCustomer());
-                    existingOrder.setCreatedDate(orderDTO.getCreatedDate());
-                    existingOrder.setStatus(orderDTO.getStatus());
-                    existingOrder.setFreight(orderDTO.getFreight());
-                    existingOrder.setShipCountry(orderDTO.getShipCountry());
-                    existingOrder.setShippingCompany(orderDTO.getShippingCompany());
-                    return orderRepository.save(existingOrder);
+        return checkDuplicate(orderDTO.getCustomer())
+                .flatMap(aBoolean -> {
+                    if (Boolean.TRUE.equals(aBoolean)) {
+                        return Mono.error(new CommonException("OE02", "User existed", HttpStatus.BAD_REQUEST));
+                    } else {
+                        Order order = Order.builder()
+                                .customer(orderDTO.getCustomer())
+                                .orderDate(orderDTO.getOrderDate())
+                                .freight(orderDTO.getFreight())
+                                .shipCountry(orderDTO.getShipCountry())
+                                .shippingCompany(orderDTO.getShippingCompany())
+                                .build();
+                        return orderRepository.save(order)
+                                .map(OrderDTO::entityToDto);
+                    }
                 });
     }
 
-    public Mono<Void> deleteOrder(Long orderId) {
-        return orderRepository.deleteById(orderId);
+    public Mono<OrderDTO> updateOrder(Integer orderId, OrderDTO orderDTO) {
+        return orderRepository.findById(orderId)
+                .switchIfEmpty(Mono.error(new CommonException("OE01", "Not found", HttpStatus.NOT_FOUND)))
+                .flatMap(existingOrder -> {
+                    Order updatedOrder = Order.builder()
+                            .orderId(existingOrder.getOrderId())
+                            .customer(orderDTO.getCustomer())
+                            .orderDate(orderDTO.getOrderDate())
+                            .freight(orderDTO.getFreight())
+                            .shipCountry(orderDTO.getShipCountry())
+                            .shippingCompany(orderDTO.getShippingCompany())
+                            .build();
+                    return orderRepository.save(updatedOrder);
+                })
+                .map(OrderDTO::entityToDto)
+                .doOnSuccess(updatedOrder -> log.info("Order updated successfully: {}", updatedOrder))
+                .doOnError(error -> log.error("Failed to update order: {}", error.getMessage(), error));
     }
 
-    private OrderDTO convertToDTO(Order order) {
-        OrderDTO dto = new OrderDTO();
-        dto.setOrderId(order.getOrderId());
-        dto.setCustomer(order.getCustomer());
-        dto.setCreatedDate(order.getCreatedDate());
-        dto.setStatus(order.getStatus());
-        dto.setFreight(order.getFreight());
-        dto.setShipCountry(order.getShipCountry());
-        dto.setShippingCompany(order.getShippingCompany());
-        return dto;
+    public Mono<Void> deleteOrder(Integer orderId) {
+        return orderRepository.findById(orderId)
+                .switchIfEmpty(Mono.error(new CommonException("OE01", "Not found", HttpStatus.NOT_FOUND)))
+                .flatMap(existingOrder -> orderRepository.deleteById(orderId))
+                .doOnSuccess(v -> log.info("Order deleted successfully for ID: {}", orderId))
+                .doOnError(error -> log.error("Failed to delete order: {}", error.getMessage(), error));
     }
 
-    private Order convertToEntity(OrderDTO dto) {
-        Order order = new Order();
-        order.setOrderId(dto.getOrderId());
-        order.setCustomer(dto.getCustomer());
-        order.setCreatedDate(dto.getCreatedDate());
-        order.setStatus(dto.getStatus());
-        order.setFreight(dto.getFreight());
-        order.setShipCountry(dto.getShipCountry());
-        order.setShippingCompany(dto.getShippingCompany());
-        return order;
-    }
 }

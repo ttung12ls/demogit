@@ -11,7 +11,6 @@ import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
 
 @Configuration
 public class DatabaseConfig {
-
     @Bean
     public ConnectionFactoryInitializer initializer(@Qualifier("connectionFactory") ConnectionFactory connectionFactory) {
         ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
@@ -20,10 +19,7 @@ public class DatabaseConfig {
         CompositeDatabasePopulator populator = new CompositeDatabasePopulator();
         populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("schema.sql")));
         initializer.setDatabasePopulator(populator);
-        
-        // Enable initialization
-        initializer.setEnabled(true);
-        
+
         return initializer;
     }
 }

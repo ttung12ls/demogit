@@ -1,9 +1,9 @@
 server:
-  port: 8081
+  port: 8083
 
 spring:
   r2dbc:
-    url: r2dbc:mysql://localhost:3306/orders?sslMode=DISABLED&tlsVersion=TLSv1.2
+    url: r2dbc:mysql://localhost:3306/order_db?sslMode=DISABLED&tlsVersion=TLSv1.2
     username: root
     password: meomeo123
     pool:
@@ -16,6 +16,7 @@ spring:
       useSSL: false
       requireSSL: false
       allowPublicKeyRetrieval: true
+      createDatabaseIfNotExist: true
 
 springdoc:
   swagger-ui:
