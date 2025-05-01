@@ -27,6 +27,6 @@
       "maxLength": 100
     }
   },
-  "required": ["customer", "shipCountry", "shippingCompany"],
+  "required": ["customer", "freight", "shipCountry", "shippingCompany"],
   "additionalProperties": false
 }

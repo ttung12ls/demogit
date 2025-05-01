@@ -27,20 +27,17 @@ public class OrderService {
 
     public Mono<OrderDTO> findById(Integer OrderId) {
         return orderRepository.findById(OrderId)
-                .map(OrderDTO::entityToDto)  // Chuyển đổi từ entity sang DTO
+                .map(OrderDTO::entityToDto)
                 .switchIfEmpty(Mono.error(new CommonException("OE01", "Not found", HttpStatus.NOT_FOUND)));
     }
 
     public Flux<OrderDTO> findByCustomerName(String customer) {
         if (customer == null || customer.trim().isEmpty()) {
-            return Flux.error(new CommonException("OE04", 
-                "Customer name cannot be empty", 
-                HttpStatus.BAD_REQUEST));
+            return Flux.error(new CommonException("OE04", "Customer name cannot be empty", HttpStatus.BAD_REQUEST));
         }
         return orderRepository.findByCustomer(customer.trim())
                 .map(OrderDTO::entityToDto)
-                .switchIfEmpty(Flux.error(new CommonException("OE01", 
-                    String.format("No orders found for customer containing: '%s'", customer), 
+                .switchIfEmpty(Flux.error(new CommonException("OE01", String.format("No orders found for customer containing: '%s'", customer),
                     HttpStatus.NOT_FOUND)));
     }
 
